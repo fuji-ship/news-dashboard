@@ -18,7 +18,10 @@
   }
   body { background: var(--bg); color: var(--text); font-family: 'Noto Sans JP', sans-serif; min-height: 100vh; }
   header { padding: 32px 40px 0; }
-  .header-top { display: flex; align-items: baseline; gap: 16px; margin-bottom: 6px; }
+  .header-top { display: flex; align-items: center; gap: 16px; margin-bottom: 6px; }
+  .header-spacer { flex: 1; }
+  .update-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all .2s; font-family: 'Noto Sans JP', sans-serif; white-space: nowrap; }
+  .update-btn:hover { border-color: #6366f1; color: #6366f1; }
   .logo { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: #fff; }
   .updated { font-size: 12px; color: var(--muted); }
   .tabs { display: flex; gap: 8px; padding: 24px 40px 0; flex-wrap: wrap; }
@@ -28,674 +31,268 @@
   .count { background: rgba(255,255,255,.2); border-radius: 999px; padding: 1px 8px; font-size: 11px; }
   .main { padding: 24px 40px 60px; }
   .panel { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; gap: 10px; transition: border-color .2s, transform .2s; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 20px 16px; display: flex; flex-direction: column; gap: 10px; transition: border-color .2s, transform .2s; position: relative; cursor: pointer; }
   .card:hover { border-color: #444466; transform: translateY(-2px); }
-  .card-source { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
-  .card-title { font-size: 15px; font-weight: 700; color: var(--text); text-decoration: none; line-height: 1.5; }
-  .card-title:hover { color: #a5b4fc; }
-  .card-summary { font-size: 13px; color: var(--muted); line-height: 1.7; flex: 1; }
+  .card-source { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; padding-right: 32px; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.5; }
+  .card-summary { font-size: 13px; color: var(--muted); line-height: 1.7; flex: 1; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
   .card-meta { font-size: 11px; color: #555566; }
-  @media(max-width:600px) { .tabs,.main,header { padding-left:16px; padding-right:16px; } .panel { grid-template-columns: 1fr; } }
+  .save-btn { position: absolute; top: 12px; right: 12px; background: transparent; border: none; color: var(--muted); cursor: pointer; font-size: 20px; line-height: 1; padding: 6px 8px; border-radius: 6px; transition: color .15s, background .15s; }
+  .save-btn:hover { background: var(--surface2); color: #f59e0b; }
+  .save-btn.saved { color: #f59e0b; }
+  .empty-state { grid-column: 1 / -1; text-align: center; padding: 80px 20px; color: var(--muted); font-size: 14px; line-height: 1.8; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.75); display: none; align-items: flex-start; justify-content: center; padding: 40px 20px; z-index: 100; overflow-y: auto; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; max-width: 720px; width: 100%; padding: 36px 36px 32px; position: relative; }
+  .modal-close { position: absolute; top: 14px; right: 18px; background: transparent; border: none; color: var(--muted); font-size: 30px; cursor: pointer; line-height: 1; padding: 4px 10px; border-radius: 8px; }
+  .modal-close:hover { background: var(--surface2); color: var(--text); }
+  .modal-source { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 12px; }
+  .modal-title { font-size: 22px; font-weight: 700; color: #fff; line-height: 1.5; margin-bottom: 10px; }
+  .modal-meta { font-size: 12px; color: #555566; margin-bottom: 22px; }
+  .modal-summary { font-size: 15px; color: var(--text); line-height: 1.9; white-space: pre-wrap; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 28px; flex-wrap: wrap; }
+  .btn { padding: 10px 20px; border-radius: 999px; font-size: 14px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); font-family: 'Noto Sans JP', sans-serif; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: all .15s; }
+  .btn-primary { background: #6366f1; border-color: #6366f1; color: #fff; }
+  .btn-primary:hover { background: #5458e0; }
+  .btn-secondary { background: var(--surface2); color: var(--text); }
+  .btn-secondary:hover { border-color: #f59e0b; color: #f59e0b; }
+  .btn-secondary.saved { border-color: #f59e0b; color: #f59e0b; }
+  /* update modal */
+  .update-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.75); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 200; }
+  .update-overlay.open { display: flex; }
+  .update-modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; max-width: 500px; width: 100%; padding: 32px; position: relative; }
+  .update-modal h3 { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 24px; }
+  .update-steps { list-style: none; display: flex; flex-direction: column; gap: 20px; }
+  .update-steps li { display: flex; gap: 14px; align-items: flex-start; font-size: 14px; color: var(--text); line-height: 1.6; }
+  .step-num { background: #6366f1; color: #fff; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .step-body { flex: 1; }
+  .cmd-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-top: 10px; display: flex; align-items: center; gap: 10px; }
+  .cmd-text { font-family: monospace; font-size: 13px; color: #a5b4fc; flex: 1; }
+  .copy-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; white-space: nowrap; transition: all .15s; }
+  .copy-btn:hover { border-color: #6366f1; color: #6366f1; }
+  .copy-btn.copied { border-color: #10b981; color: #10b981; }
+  @media(max-width:600px) { .tabs,.main,header { padding-left:16px; padding-right:16px; } .panel { grid-template-columns: 1fr; } .modal { padding: 28px 22px 24px; } .update-modal { padding: 24px 18px; } }
 </style>
 </head>
 <body>
 <header>
   <div class="header-top">
     <span class="logo">Daily News</span>
-    <span class="updated">更新：2026年05月12日 23:04</span>
+    <span class="updated">更新：2026年05月12日 23:24</span>
+    <div class="header-spacer"></div>
+    <button class="update-btn" id="update-btn">🔄 ニュース更新</button>
   </div>
 </header>
-<div class="tabs"><button class="tab active" onclick="switchTab('AI')" data-cat="AI" style="--accent:#6366f1">AI<span class="count">25</span></button><button class="tab " onclick="switchTab('投資・経済')" data-cat="投資・経済" style="--accent:#10b981">投資・経済<span class="count">10</span></button><button class="tab " onclick="switchTab('仮想通貨')" data-cat="仮想通貨" style="--accent:#f59e0b">仮想通貨<span class="count">15</span></button><button class="tab " onclick="switchTab('お金・資産形成')" data-cat="お金・資産形成" style="--accent:#ec4899">お金・資産形成<span class="count">5</span></button><button class="tab " onclick="switchTab('書籍・ビジネス')" data-cat="書籍・ビジネス" style="--accent:#8b5cf6">書籍・ビジネス<span class="count">25</span></button></div>
-<div class="main"><div class="panel" id="panel-AI" style="display:block">
-            <div class="card">
-                <div class="card-source">TechCrunch AI</div>
-                <a class="card-title" href="https://techcrunch.com/2026/05/12/dessn-raises-6m-for-its-production-focused-design-tool/" target="_blank">Dessn raises $6M for its production focused design tool</a>
-                <p class="card-summary"># 要約
+<div class="tabs" id="tabs"></div>
+<div class="main" id="main"></div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <button class="modal-close" aria-label="閉じる" id="modal-close">×</button>
+    <div class="modal-source" id="modal-source"></div>
+    <h2 class="modal-title" id="modal-title"></h2>
+    <div class="modal-meta" id="modal-meta"></div>
+    <p class="modal-summary" id="modal-summary"></p>
+    <div class="modal-actions">
+      <a class="btn btn-primary" id="modal-link" target="_blank" rel="noopener">元記事を読む →</a>
+      <button class="btn btn-secondary" id="modal-save">☆ 保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="update-overlay" id="update-overlay">
+  <div class="update-modal" role="dialog" aria-modal="true">
+    <button class="modal-close" id="update-modal-close">×</button>
+    <h3>ニュースを最新情報に更新する</h3>
+    <ol class="update-steps">
+      <li>
+        <span class="step-num">1</span>
+        <div class="step-body">ターミナルアプリを開く<br><span style="font-size:12px;color:var(--muted)">Mac: Spotlight（⌘Space）で「Terminal」を検索</span></div>
+      </li>
+      <li>
+        <span class="step-num">2</span>
+        <div class="step-body">
+          以下のコマンドをコピーして貼り付ける
+          <div class="cmd-box">
+            <span class="cmd-text">python3 ~/news-dashboard/fetch_news.py</span>
+            <button class="copy-btn" id="copy-cmd-btn">コピー</button>
+          </div>
+        </div>
+      </li>
+      <li>
+        <span class="step-num">3</span>
+        <div class="step-body">Enter を押して実行し、完了後にページを再読み込み（⌘R）する</div>
+      </li>
+    </ol>
+  </div>
+</div>
 
-デザインツールスタートアップのDessnが600万ドルの資金調達を完了し、本番環境のコードベースと直接連動するAI搭載デザインツールの開発を進めます。このツールは、デザインプロセスを簡素化し、デザインから実装までのワークフローを効率化することを目指しています。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">TechCrunch AI</div>
-                <a class="card-title" href="https://techcrunch.com/2026/05/12/vapi-hits-500m-valuation-as-amazon-ring-chose-its-ai-platform-over-40-rivals/" target="_blank">AI voice startup Vapi hits $500M valuation after winning Amazon Ring over 40 rivals</a>
-                <p class="card-summary"># 記事の要約
-
-AI音声スタートアップのVapiは、40社以上のライバルを破ってAmazon Ringを獲得し、企業価値が5億ドルに達しました。同社は2025年初頭から企業向けビジネスが10倍に成長しており、カスタマーサポートと営業通話をAIエージェントにシフトさせる企業が増えていることが成長を支えています。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">TechCrunch AI</div>
-                <a class="card-title" href="https://techcrunch.com/2026/05/11/thinking-machines-wants-to-build-an-ai-that-actually-listens-while-it-talks/" target="_blank">Thinking Machines wants to build an AI that actually listens while it talks</a>
-                <p class="card-summary"># 記事要約
-
-Thinking Machinesは、現在のAIモデルの「話を聞いてから応答する」という従来の方式を変え、ユーザーの入力を処理しながら同時に応答を生成するモデルの開発を目指しています。これにより、チャットのようなやり取りではなく、電話での会話に近い、より自然な双方向のコミュニケーションが実現する予定です。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">TechCrunch AI</div>
-                <a class="card-title" href="https://techcrunch.com/2026/05/11/riding-an-ai-rally-robinhood-preps-second-retail-venture-ipo/" target="_blank">Riding an AI rally, Robinhood preps second retail venture IPO</a>
-                <p class="card-summary"># 要約
-
-ロビンフッドがAIブームに乗じて、成長段階およびアーリーステージのスタートアップを対象とした第2号ベンチャーファンドについて機密裏に申請した。同社はこのファンドを通じて、有望なスタートアップへの投資を拡大する方針を示している。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">TechCrunch AI</div>
-                <a class="card-title" href="https://techcrunch.com/2026/05/11/gm-just-laid-off-hundreds-of-it-workers-to-hire-those-with-stronger-ai-skills/" target="_blank">GM just laid off hundreds of IT workers to hire those with stronger AI skills</a>
-                <p class="card-summary"># 記事の要約
-
-GMが数百人のIT労働者をレイオフし、AI関連のスキルがより強い人材を採用しました。新たに採用される職種は、AI-native開発、データエンジニアリング、クラウドエンジニアリング、エージェント・モデル開発、プロンプトエンジニアリング、新しいAIワークフローなど、AI技術に特化した職務に焦点が当てられています。</p>
-                <div class="card-meta">Mon, 11 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">MIT Tech Review</div>
-                <a class="card-title" href="https://www.technologyreview.com/2026/05/12/1137103/the-download-nobel-winner-ai-maintenance-of-everything/" target="_blank">The Download: a Nobel winner on AI, and the case for fixing everything</a>
-                <p class="card-summary"># 記事の要約
-
-2024年のノーベル経済学賞受賞者ダロン・アセモグルは、AIの発展について警告を発しており、技術進歩がすべての課題を解決するわけではないと主張しています。記事では、彼が提唱するAIに関して注視すべき3つのポイントが紹介されています。アセモグルの見方は、AIの急速な発展の中で、その社会的・経済的影響を慎重に検討する必要があることを強調しています。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">MIT Tech Review</div>
-                <a class="card-title" href="https://www.technologyreview.com/2026/05/11/1137090/three-things-in-ai-to-watch-according-to-a-nobel-winning-economist/" target="_blank">Three things in AI to watch, according to a Nobel-winning economist</a>
-                <p class="card-summary"># 記事の要約
-
-2024年にノーベル経済学賞を受賞したダロン・アセモグルが、シリコンバレーで不評となった論文を発表しました。この論文は、大手テック企業の主張とは異なる内容のAIに関する見解を示しています。アセモグルはAIの発展について、テック産業の一般的な認識とは異なる重要な観点から3つのポイントに注意を払うべきだと主張しています。</p>
-                <div class="card-meta">Mon, 11 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">MIT Tech Review</div>
-                <a class="card-title" href="https://www.technologyreview.com/2026/05/11/1136967/fostering-breakthrough-ai-innovation-through-customer-back-engineering/" target="_blank">Fostering breakthrough AI innovation through customer-back engineering</a>
-                <p class="card-summary"># 記事の要約
-
-大多数の企業はデジタル投資から期待される価値の3分の1以下しか得られていません。その理由は、顧客ニーズから逆算して技術ソリューションを構築するのではなく、技術的能力から始まるアプローチを採用しているためです。顧客を優先しないと、断片的で不統一なソリューションが生まれ、デジタル変革の効果が限定的になるということです。</p>
-                <div class="card-meta">Mon, 11 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">MIT Tech Review</div>
-                <a class="card-title" href="https://www.technologyreview.com/2026/05/11/1136406/innovation-abounds-in-device-charging/" target="_blank">Innovation abounds in device charging</a>
-                <p class="card-summary"># 記事の要約
-
-スマートフォンやタブレットほど目立たないものの、充電器もこの10年で大きく進化している。かつては嵩張ったケーブルと接続端子の絡まった塊で、速度が遅く過熱しやすかったが、様々な技術進歩により、現在はより小型で安全、高速になっている。</p>
-                <div class="card-meta">Mon, 11 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">MIT Tech Review</div>
-                <a class="card-title" href="https://www.technologyreview.com/2026/05/11/1136786/implementing-advanced-ai-technologies-in-finance/" target="_blank">Implementing advanced AI technologies in finance</a>
-                <p class="card-summary"># 記事の要約
-
-金融部門ではAI技術が指導部の統制を待たずに従業員によって既に使用されており、リーダーシップが事後的にガバナンスと戦略を整備しようとしているという矛盾が生じています。このような状況は、厳密な規制を受ける金融機能において、AIの導入が秩序立った計画的なものではなく、むしろ静かな反乱のような形で進行していることを示しています。</p>
-                <div class="card-meta">Mon, 11 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">The Verge</div>
-                <a class="card-title" href="https://www.theverge.com/tech/928473/amazons-ultrafast-30-minute-deliveries-are-now-available-in-more-cities" target="_blank">Amazon’s ultrafast 30-minute deliveries are now available in more cities</a>
-                <p class="card-summary"># 記事の要約
-
-Amazonは、シアトルとフィラデルフィアでの限定テストを経て、「Amazon Now」という30分以内の配送サービスを米国全域で本格展開しました。現在はシアトル、フィラデルフィア、アトランタ、ダラス・フォートワースで利用可能であり、さらに他の都市への拡大も予定されています。</p>
-                <div class="card-meta">2026-05-12T09:34</div>
-            </div>
-            <div class="card">
-                <div class="card-source">The Verge</div>
-                <a class="card-title" href="https://www.theverge.com/transportation/928480/waymo-recall-flooded-roads-robotaxi" target="_blank">Waymo recalls robotaxis for driving on flooded roads</a>
-                <p class="card-summary"># 記事の要約
-
-Waymoが冠水した道路を走行できるようにしていた自動運転ソフトウェアをリコールしました。このリコールは同社の第5・第6世代システムを使用する3,791台の車両に影響を及ぼします。米国道路交通安全局に提出された書類では、無人のWaymoロボタクシーが通行不可能な冠水区間に遭遇したことが報告されています。</p>
-                <div class="card-meta">2026-05-12T09:32</div>
-            </div>
-            <div class="card">
-                <div class="card-source">The Verge</div>
-                <a class="card-title" href="https://www.theverge.com/tech/928470/instructure-canvas-hack-shinyhunters-ransom-agreement" target="_blank">Canvas owner reaches &#8216;agreement&#8217; with hackers to secure stolen data</a>
-                <p class="card-summary"># 記事の要約
-
-学習管理プラットフォーム「Canvas」を運営するInstructure社は、先週のシステム侵害で盗まれたデータの流出を防ぐため、ハッカー集団と「合意に達した」と発表しました。責任を主張した「ShinyHunters」というハッキンググループは、3.5テラバイトの学生データを公開すると脅迫していました。</p>
-                <div class="card-meta">2026-05-12T09:23</div>
-            </div>
-            <div class="card">
-                <div class="card-source">The Verge</div>
-                <a class="card-title" href="https://www.theverge.com/entertainment/928395/spotify-20th-anniversary-wrapped-recap" target="_blank">Spotify’s latest ‘Wrapped’ covers your entire music history</a>
-                <p class="card-summary"># 要約
-
-Spotify は創立 20 周年を記念して、ユーザーがサービスに加入した当初からの音楽リスニング履歴全体を閲覧できる新機能を提供します。モバイルアプリユーザーは「Spotify 20: Your Party of the Year(s)」という新しい体験にアクセスでき、これまで共有されたことのないデータを含む完全にパーソナライズされた音楽履歴を確認できます。</p>
-                <div class="card-meta">2026-05-12T08:15</div>
-            </div>
-            <div class="card">
-                <div class="card-source">The Verge</div>
-                <a class="card-title" href="https://www.theverge.com/tech/928276/google-android-show-io-edition-2026-how-to-watch" target="_blank">How to watch Google’s Android Show: I/O Edition today</a>
-                <p class="card-summary"># 要約
-
-Google I/Oカンファレンスの1週間前に、Googleが「Android Show: I/O Edition」を開催し、年次開発者会議で発表される主要なAndroidエコシステムの最新情報を先行発表します。このイベントはストリーミング配信されるため、オンラインで視聴することができます。</p>
-                <div class="card-meta">2026-05-12T07:00</div>
-            </div>
-            <div class="card">
-                <div class="card-source">OpenAI Blog</div>
-                <a class="card-title" href="https://openai.com/signals/research/2026q1-update" target="_blank">How ChatGPT adoption broadened in early 2026</a>
-                <p class="card-summary"># 要約
-
-2026年第1四半期にChatGPTの利用者数が急増し、特に35歳以上のユーザーの成長が最も顕著であり、また男女間の利用の差も縮小したことから、AIがより広い範囲で主流化していることが示唆されている。</p>
-                <div class="card-meta">Mon, 11 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">OpenAI Blog</div>
-                <a class="card-title" href="https://openai.com/index/openai-campus-network-student-club-interest-form" target="_blank">OpenAI Campus Network: Student club interest form</a>
-                <p class="card-summary"># 記事の要約
-
-OpenAIが学生クラブ向けのキャンパスネットワークプログラムを展開しており、参加することで世界中の学生クラブとのネットワーク構築、AIツールへのアクセス、イベント開催が可能になります。このプログラムを通じて、キャンパスコミュニティがAI技術を活用した環境の構築を目指しています。</p>
-                <div class="card-meta">Mon, 11 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">OpenAI Blog</div>
-                <a class="card-title" href="https://openai.com/business/guides-and-resources/how-enterprises-are-scaling-ai" target="_blank">How enterprises are scaling AI</a>
-                <p class="card-summary"># 記事の要約
-
-企業がAIを拡大導入する際には、初期段階の実験から複合的な効果を生み出すために、信頼性、ガバナンス、ワークフロー設計、そして大規模な品質管理が重要な要素となります。これらの要素を組み合わせることで、AIの導入をより効果的に進めることができます。</p>
-                <div class="card-meta">Mon, 11 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">OpenAI Blog</div>
-                <a class="card-title" href="https://openai.com/index/openai-launches-the-deployment-company" target="_blank">OpenAI launches DeployCo to help businesses build around intelligence</a>
-                <p class="card-summary"># 記事の要約
-
-OpenAIは企業向けの新部門「DeployCo」を立ち上げました。この部門は、組織が最先端のAIを実運用に導入し、測定可能なビジネス成果に転換するのを支援することを目的としています。</p>
-                <div class="card-meta">Mon, 11 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">OpenAI Blog</div>
-                <a class="card-title" href="https://openai.com/index/running-codex-safely" target="_blank">Running Codex safely at OpenAI</a>
-                <p class="card-summary"># 記事の要約
-
-OpenAIは、Codexを安全に運用するために、サンドボックス化、承認プロセス、ネットワークポリシー、およびエージェント固有のテレメトリーを実装しています。これらのセキュリティ対策により、安全でコンプライアンスに準拠したコーディングエージェントの採用を支援しています。</p>
-                <div class="card-meta">Fri, 08 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">Google AI Blog</div>
-                <a class="card-title" href="https://blog.google/products-and-platforms/products/search/ai-powered-google-finance-in-europe/" target="_blank">The new AI-powered Google Finance is expanding to Europe.</a>
-                <p class="card-summary"># 記事の要約
-
-AI機能を搭載した新しいGoogleファイナンスがヨーロッパへ拡大しています。この新機能により、ユーザーはより高度な金融情報の分析と取得が可能になります。</p>
-                <div class="card-meta">Mon, 11 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">Google AI Blog</div>
-                <a class="card-title" href="https://blog.google/company-news/inside-google/company-announcements/the-small-brief/" target="_blank">See what happens when creative legends use AI to make ads for small businesses.</a>
-                <p class="card-summary"># 記事の要約
-
-この記事は、著名なクリエイティブ業界の伝説的人物たちが、AIを活用して中小企業向けの広告制作に挑戦する様子を紹介しています。スーザン・クレドル、ジャヨンタ・ジェンキンス、ティファニー・ロルフといった業界の第一人者たちが、最新のAI技術を使いこなし、どのような革新的な広告が生まれるかを探索しています。</p>
-                <div class="card-meta">Fri, 08 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">Google AI Blog</div>
-                <a class="card-title" href="https://blog.google/products-and-platforms/products/search/gardening-tips/" target="_blank">5 gardening tips you can try right in Search</a>
-                <p class="card-summary"># 記事の要約
-
-申し訳ございませんが、提供していただいた内容は画像の説明文のみで、実際の記事本文がありません。要約するには、タイトル「Search内で試せるガーデニングの5つのコツ」についての詳しい本文内容が必要です。記事の本文をご提供いただければ、2～3文で要約させていただきます。</p>
-                <div class="card-meta">Wed, 06 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">Google AI Blog</div>
-                <a class="card-title" href="https://blog.google/innovation-and-ai/technology/ai/future-vision-film-competition-xprize/" target="_blank">Google is partnering with XPRIZE and Range Media Partners on the $3.5 million Future Vision film competition.</a>
-                <p class="card-summary"># 記事の要約
-
-GoogleがXPRIZEとRange Media Partnersと協力して、総額350万ドルの「Future Vision」フィルムコンペティションを開催します。このコンペティションは、AIやテクノロジーが未来にもたらす可能性を描いた映像作品を募集するもので、革新的なビジョンを持つクリエイターたちを支援・表彰することを目的としています。</p>
-                <div class="card-meta">Tue, 05 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">Google AI Blog</div>
-                <a class="card-title" href="https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-april-2026/" target="_blank">The latest AI news we announced in April 2026</a>
-                <p class="card-summary"># 記事の要約
-
-申し訳ございませんが、提供いただいたテキストが非常に短く、具体的な情報に欠けているため、正確な要約が難しい状況です。記事では、2026年4月に発表されたAIニュースについて、水中ビデオとモバイルAIビデオモックアップを含むmp4ファイルに関する内容が示唆されているようですが、詳細な文脈や説明がないため、より詳しい本文をご提供いただけますでしょうか。</p>
-                <div class="card-meta">Mon, 04 May 2026</div>
-            </div></div><div class="panel" id="panel-投資・経済" style="display:none">
-            <div class="card">
-                <div class="card-source">NHK ビジネス</div>
-                <a class="card-title" href="http://www3.nhk.or.jp/news/html/20260512/k10015119701000.html" target="_blank">高市首相 原油代替調達”来月7割以上確保”今月は備蓄放出せず</a>
-                <p class="card-summary"># 記事の要約
-
-高市首相は、ホルムズ海峡を迂回した原油の代替調達により、6月には7割以上の確保が見込まれるなど、調達源の多角化が進んでいることを発表しました。一方、5月は国家石油備蓄の追加放出を行わないことを明らかにしました。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">NHK ビジネス</div>
-                <a class="card-title" href="http://www3.nhk.or.jp/news/html/20260512/k10015120001000.html" target="_blank">自民調査会 安保3文書論点整理案“シーレーン防衛強化を”</a>
-                <p class="card-summary"># 記事の要約
-
-自民党の調査会が安全保障関連の3文書改定に向けた論点整理案をまとめました。海洋安全保障では、シーレーン防衛能力の強化、国際航路の多角化、海上保安庁の装備増強などの強化が検討課題として提示されています。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">NHK ビジネス</div>
-                <a class="card-title" href="http://www3.nhk.or.jp/news/html/20260512/k10015119801000.html" target="_blank">中道 衆院選総括“大胆な党改革の実行が不可欠”</a>
-                <p class="card-summary"># 要約
-
-中道改革連合は衆議院選挙で大敗した原因を総括し、立憲民主党と公明党の支持基盤を過信したことが「最大の誤算」だったと指摘しました。今後、党の抜本的な改革を実行することが必須だと述べています。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">NHK ビジネス</div>
-                <a class="card-title" href="http://www3.nhk.or.jp/news/html/20260512/k10015119811000.html" target="_blank">OECDとの経済安保協力プランに基づき連携確認 高市首相</a>
-                <p class="card-summary"># 記事の要約
-
-高市総理大臣はOECD事務総長と会談し、経済安全保障分野での協力プランに基づいて両者が緊密に連携していくことを確認しました。これにより、経済と安全保障の両面での国際協力が推進されることになります。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">NHK ビジネス</div>
-                <a class="card-title" href="http://www3.nhk.or.jp/news/html/20260512/k10015119281000.html" target="_blank">高性能AIモデルによるサイバー攻撃リスク対応を指示 高市首相</a>
-                <p class="card-summary"># 記事の要約
-
-高市首相は、米国開発の高性能AIモデルがもたらすサイバー攻撃リスクに対応するため、松本デジタル大臣に具体的な対策の検討と実施を急ぐよう指示しました。これは、AIモデルが重要な社会基盤への脅威となる可能性が指摘されたことを受けた措置です。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">ZUU online</div>
-                <a class="card-title" href="https://zuuonline.com/archives/301832" target="_blank">日々是相場［夕刊］――  2026年5月12日（火）</a>
-                <p class="card-summary"># 記事の要約
-
-2026年5月12日の日経平均は62,742.57円と前日比324.69円上昇しました。ドル円相場は1ドル=157.46円で推移し、値上り銘柄675銘柄に対して値下り銘柄が849銘柄と下落銘柄が上回っています。市場は手掛かり難で目先の需給に左右される不安定な展開となっているようです。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">ZUU online</div>
-                <a class="card-title" href="https://zuuonline.com/archives/301831" target="_blank">米ドル／円 ―― とにかく現在はベッセント･高市会談待ちだ</a>
-                <p class="card-summary"># 記事の要約
-
-この記事は、2026年5月12日に現役トレーダーの志摩力男氏が述べた米ドル／円の相場観を紹介したものです。現在の相場動向は、ベッセント財務長官と高市経済安全保障担当大臣の会談の結果を待つ段階にあるという状況を伝えています。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">ZUU online</div>
-                <a class="card-title" href="https://zuuonline.com/archives/301829" target="_blank">米ドル／円 ―― 戻り売りで持ったポジションは下がったところでこまめに確実に利食って行きたい</a>
-                <p class="card-summary"># 記事要約
-
-この記事は、現役トレーダー・小林芳彦氏が2026年5月12日時点で述べたドル円相場の見通しとトレード戦略を紹介しています。戻り売りで保有するポジションは、下値を狙ってこまめに確実に利益確定することが重要というのが同氏の主な主張です。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">ZUU online</div>
-                <a class="card-title" href="https://zuuonline.com/archives/301770" target="_blank">【跳ね馬の新たな最高峰】Driving Review：Road／スペイン南部セビリア近郊のワインディングでテストドライブ。フェラーリ849テスタロッサは走るほど身体に馴染んでいった</a>
-                <p class="card-summary"># 記事の要約
-
-スペイン南部セビリア近郊のワインディングロードで、フェラーリの新型モデル「849テスタロッサ」のテストドライブが行われました。走行を重ねるにつれ、このクルマは運転者の身体に自然と馴染んでいき、終始快適なドライブフィールを提供したとのことです。フェラーリの新たな最高峰モデルとしての性能が確認されたレビュー記事です。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">ZUU online</div>
-                <a class="card-title" href="https://zuuonline.com/archives/301640" target="_blank">上司のためにもなる、ボスマネジメント4つの価値</a>
-                <p class="card-summary"># 記事の要約
-
-ボスマネジメント（上司との効果的な関係構築）は、個人のキャリアデザインに加えて、上司・組織・周囲にも好影響をもたらす4つの価値を生み出します。この手法により、単に部下が得するだけでなく、組織全体の成果向上につながる相乗効果が期待できます。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div></div><div class="panel" id="panel-仮想通貨" style="display:none">
-            <div class="card">
-                <div class="card-source">CoinDesk</div>
-                <a class="card-title" href="https://www.coindesk.com/business/2026/05/12/france-s-central-banker-beau-breaks-with-ecb-s-lagarde-calls-for-private-tokenized-euro-mobilization" target="_blank">France’s central banker Beau clashes with Lagarde over private digital euro plans</a>
-                <p class="card-summary">申し訳ございませんが、記事の本文が提供されていないため、要約することができません。タイトルから判断すると、フランスの中央銀行家ボー氏がラガルド氏とデジタルユーロの民間企業向けプランについて対立しているという内容のようですが、正確な要約のためには本文が必要です。記事の本文をご提供いただければ、2〜3文で日本語に要約いたします。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">CoinDesk</div>
-                <a class="card-title" href="https://www.coindesk.com/markets/2026/05/12/ebay-rejects-gamestop-s-usd56-billion-bid-putting-bitcoin-exposure-back-in-focus" target="_blank">EBay rejects GameStop’s $56 billion bid, putting bitcoin exposure back in focus</a>
-                <p class="card-summary"># 申し訳ございませんが、記事の本文が提供されていないため、要約することができません。
-
-タイトルのみから判断すると、eBayがGameStopの560億ドルの買収提案を拒否し、ビットコインへの露出（保有）に再び焦点が当たったという内容と思われます。
-
-本文をご提供いただければ、正確な要約を作成させていただきます。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">CoinDesk</div>
-                <a class="card-title" href="https://www.coindesk.com/business/2026/05/12/kraken-parent-franklin-templeton-to-develop-onchain-investment-products" target="_blank">Kraken parent, Franklin Templeton to develop onchain investment products</a>
-                <p class="card-summary"># 記事の要約
-
-暗号資産取引所クラーケンの親会社であるPayword社とフランクリン・テンプルトン（Franklin Templeton）が協力して、ブロックチェーン上での投資商品の開発を進める。このパートナーシップにより、従来の金融商品をオンチェーン化し、より透明性が高く効率的な投資環境を実現することが目標である。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">CoinDesk</div>
-                <a class="card-title" href="https://www.coindesk.com/business/2026/05/12/elliptic-raises-usd120-million-backed-by-nasdaq-deutsche-bank-as-ai-reshapes-crypto-security" target="_blank">Elliptic raises $120 million backed by Nasdaq, Deutsche Bank as AI reshapes crypto security</a>
-                <p class="card-summary"># 記事の要約
-
-暗号資産のセキュリティ企業Ellipticが、Nasdaqやドイツ銀行などからのバックアップを受けて1億2,000万ドルの資金調達に成功しました。同社はAI技術を活用して、暗号資産関連の不正検出や規制遵守機能を強化しており、金融機関や規制当局の需要が高まっています。この資金調達は、AI技術がブロックチェーン業界のセキュリティと規制対応をどう変えるかを示す事例です。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">CoinDesk</div>
-                <a class="card-title" href="https://www.coindesk.com/coindesk-indices/2026/05/12/coindesk-20-performance-update-sui-drops-4-9-as-index-trades-lower" target="_blank">CoinDesk 20 performance update: SUI drops 4.9%, as index trades lower</a>
-                <p class="card-summary"># 記事の要約
-
-CoinDesk 20指数に含まれる暗号資産の中で、SUI（スイ）が4.9%下落し、指数全体が低下しています。このパフォーマンス更新は、暗号資産市場における価格変動の最新動向を示しています。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">CoinTelegraph</div>
-                <a class="card-title" href="https://cointelegraph.com/press-releases/istanbul-blockchain-week-returns-in-june-2026-amid-surging-crypto-adoption-in-trkiye?utm_source=rss_feed&utm_medium=rss&utm_campaign=rss_partner_inbound" target="_blank">Istanbul Blockchain Week returns in June 2026 amid surging crypto adoption in Türkiye</a>
-                <p class="card-summary"># 記事の要約
-
-Istanbul Blockchain Weekは、Web3マーケティング企業EAK Digitalにより開催される5回目の大会として、2026年6月2日～3日にヒルトン・ボモンティ・ホテルで開催予定です。トルコにおける暗号資産採用の急速な拡大の中での開催となります。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">CoinTelegraph</div>
-                <a class="card-title" href="https://cointelegraph.com/news/wells-fargo-ether-etf-boost-q1-2026-btc-rotation?utm_source=rss_feed&utm_medium=rss&utm_campaign=rss_partner_inbound" target="_blank">Wells Fargo lifts Ether ETF holdings in Q1 as Bitcoin positions shift</a>
-                <p class="card-summary"># 記事の要約
-
-ウェルズ・ファーゴは2026年第1四半期の13F提出書類によると、イーサリアムETFへのエクスポージャーを増加させながら、ビットコイン保有をシフトさせ、Strategy株式を大幅に増やしたことが明らかになった。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">CoinTelegraph</div>
-                <a class="card-title" href="https://cointelegraph.com/news/bakkt-pivots-into-stablecoin-infrastructure-as-revenue-tumbles-77-in-q1?utm_source=rss_feed&utm_medium=rss&utm_campaign=rss_partner_inbound" target="_blank">Bakkt pivots into stablecoin infrastructure as revenue tumbles 77% in Q1</a>
-                <p class="card-summary"># 記事の要約
-
-Bakktは第1四半期に仮想通貨取引量の減少により売上が77%低下して243.6百万ドルとなり、1株当たり0.41ドルの純損失を計上しました。同社は収益悪化に対応してステーブルコイン関連インフラへの事業転換を進めています。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">CoinTelegraph</div>
-                <a class="card-title" href="https://cointelegraph.com/news/bhutans-gelephu-offers-quick-licences-bank-accounts-crypto-firms?utm_source=rss_feed&utm_medium=rss&utm_campaign=rss_partner_inbound" target="_blank">Bhutan’s GMC offers quick licenses, bank accounts to lure crypto firms</a>
-                <p class="card-summary"># 記事の要約
-
-ブータンのゲレフ・マインドフルネス・シティ（GMC）は、規制対象の暗号資産企業を誘致するため、迅速なライセンス取得と銀行口座開設、ゼロ税制のインセンティブを提供しています。この取り組みは、長期的な事業運営を構築する企業の参入を目指しています。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">CoinTelegraph</div>
-                <a class="card-title" href="https://cointelegraph.com/press-releases/rewardy-wallet-launches-global-multi-chain-swap-campaign-with-incentives?utm_source=rss_feed&utm_medium=rss&utm_campaign=rss_partner_inbound" target="_blank">Rewardy Wallet launches global multi-chain swap campaign with incentives</a>
-                <p class="card-summary"># 記事要約
-
-Chainwithが提供するセルフカストディウォレット「Rewardy Wallet」が、Ethereum、BNB Chain、Solana、Aptosの4つのブロックチェーン全体で2週間のユーザー活性化キャンペーンを開始しました。このキャンペーンでは100ドル以上の賞金が用意されています。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">あたらしい経済</div>
-                <a class="card-title" href="https://www.neweconomy.jp/posts/572947" target="_blank">サークル、独自L1「Arc」のトークンで約3.2億ドル調達。a16zやブラックロックら参加</a>
-                <p class="card-summary"># 記事の要約
-
-米Circle Internet Groupが開発するレイヤー1ブロックチェーン「Arc」のネイティブトークン「ARC」のプレセールで、a16zやBlackRockなど大手投資家の参加により約3.2億ドル（約350億円）を調達しました。Circleは独自のブロックチェーン基盤を通じて、暗号資産市場での影響力を拡大しようとしています。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">あたらしい経済</div>
-                <a class="card-title" href="https://www.neweconomy.jp/posts/572885" target="_blank">リップルプライム、最大2億ドルの融資枠確保。ニューバーガー運用ファンドから</a>
-                <p class="card-summary"># 記事の要約
-
-米リップルが提供するマルチアセット型プライムブローカレッジ「リップル・プライム」が、ニューバーガー・スペシャルティ・ファイナンスから最大2億ドル（約315億円）の融資枠を確保しました。この融資は、暗号資産機関投資家向けのサービス充実を目的としています。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">あたらしい経済</div>
-                <a class="card-title" href="https://www.neweconomy.jp/posts/572887" target="_blank">【追記】コインチェックGがKDDIと資本提携で100億円調達へ、新会社組成も</a>
-                <p class="card-summary"># 記事の要約
-
-暗号資産取引所「Coincheck」を運営するコインチェックが、KDDIとの業務提携を発表し、100億円の資本調達を予定しています。この提携により、コインチェック、KDDI、auフィナンシャルホールディングが新会社を組成し、暗号資産事業の拡大を目指します。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">あたらしい経済</div>
-                <a class="card-title" href="https://www.neweconomy.jp/posts/572867" target="_blank">バイナンス、AI活用で約1.6兆円の詐欺被害を防止</a>
-                <p class="card-summary"># 記事の要約
-
-バイナンスがAI技術を活用した不正検知システムにより、2025年初頭から2026年第1四半期にかけて、累計105億3,000万ドル（約1兆6,577億円）のユーザー被害を防止したと報告した。このシステムはAIを駆使して詐欺やなりすまし行為などの不正取引を検出し、利用者を保護している。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">あたらしい経済</div>
-                <a class="card-title" href="https://www.neweconomy.jp/posts/572849" target="_blank">スイ、ステーブルコイン送金無料化へ。プライベートトランザクションも導入予定</a>
-                <p class="card-summary"># 記事の要約
-
-レイヤー1ブロックチェーン「スイ（Sui）」は、ステーブルコイン送金を無料化する機能とプライベートトランザクション機能を導入予定である。この発表はミステン・ラボ（Mysten Labs）のCPOによってなされた。これらの機能導入により、スイはユーザーの利便性とプライバシー保護を強化する予定である。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div></div><div class="panel" id="panel-お金・資産形成" style="display:none">
-            <div class="card">
-                <div class="card-source">東洋経済オンライン</div>
-                <a class="card-title" href="https://toyokeizai.net/articles/-/944305?utm_source=rss&utm_medium=http&utm_campaign=link_back" target="_blank">【大川智宏vsアナウンサー】円安はどこまで進む？為替相場の行方をガチ討論！「巨額のデジタル赤字が…」AIも駆使して議論白熱！／1年後に1ドル=200円に「到達する」VS「到達しない」 | ビジネス | 東洋経済オンライン</a>
-                <p class="card-summary"># 記事の要約
-
-この記事は、市場分析の専門家・大川智宏氏とアナウンサーが、1年後の円相場が1ドル=200円に到達するかどうかについてディベート（討論）しているものです。大川氏は「到達しない派」の立場から、デジタル赤字などの要因を交えながら、AI技術も活用して為替相場の行方について白熱した議論を繰り広げています。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">東洋経済オンライン</div>
-                <a class="card-title" href="https://toyokeizai.net/articles/-/944258?utm_source=rss&utm_medium=http&utm_campaign=link_back" target="_blank">LINEヤフー･ベイン連合がカカクコム買収で対抗提案､スウェーデンの投資会社EQTと争う形に | 政治・経済・投資 | 東洋経済オンライン</a>
-                <p class="card-summary"># 記事要約
-
-LINEヤフーと米ベイン・キャピタルの連合がカカクコムの買収を提案し、スウェーデンの投資会社EQTとの買収競争が発生しました。両者はカカクコムの企業価値向上を目指して対抗提案を行っており、買収戦が繰り広げられています。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">東洋経済オンライン</div>
-                <a class="card-title" href="https://toyokeizai.net/articles/-/944243?utm_source=rss&utm_medium=http&utm_campaign=link_back" target="_blank">ベッセント氏｢アメリカと日本の強固な経済パートナーシップをあらためて確認できたことを喜ばしく思う｣と表明 | 政治・経済・投資 | 東洋経済オンライン</a>
-                <p class="card-summary"># 記事の要約
-
-ベッセント米財務長官と片山財務相の会談において、日米両国は為替市場の変動に連携して対応する姿勢を確認しました。経済パートナーシップの強化や重要鉱物の取り組みなど、幅広い経済協力について前向きに議論され、両国間の強固な経済関係が改めて確認されました。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">東洋経済オンライン</div>
-                <a class="card-title" href="https://toyokeizai.net/articles/-/944217?utm_source=rss&utm_medium=http&utm_campaign=link_back" target="_blank">日本の｢もがみ｣型護衛艦か？イギリスの31型フリゲートか？…ニュージーランドへの艦艇供給をめぐって受注競争 | 政治・経済・投資 | 東洋経済オンライン</a>
-                <p class="card-summary"># 記事要約
-
-ニュージーランド海軍の次世代艦艇選定をめぐり、日本の「もがみ」型護衛艦とイギリスの31型フリゲートが受注競争を繰り広げています。豪州の導入動向や地域安全保障、コストや運用連携といった複雑な要因が、この選定に影響を与えています。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">東洋経済オンライン</div>
-                <a class="card-title" href="https://toyokeizai.net/articles/-/944213?utm_source=rss&utm_medium=http&utm_campaign=link_back" target="_blank">サバンナ高橋のいじめ謝罪で露呈した｢匿名トーク｣の限界　ネット特定班に先回りした相方･八木の"救いの手" | ライフ | 東洋経済オンライン</a>
-                <p class="card-summary"># 記事の要約
-
-芸人中山功太が「10年以上いじめられた先輩」と告白したことで、SNS上で犯人特定が過熱し、サバンナ高橋茂雄がいじめを認めるに至りました。この事件を通じて、匿名トークが現代ネット社会にもたらす検証なき情報拡散や社会的制裁の危険性が露呈し、相方・八木の対応がその限界を浮き彫りにしました。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div></div><div class="panel" id="panel-書籍・ビジネス" style="display:none">
-            <div class="card">
-                <div class="card-source">SERENDIP（書籍要約）</div>
-                <a class="card-title" href="https://www.serendip.site/20260512" target="_blank">【新書】社会経済の発展と進化に資するロビー活動の実態</a>
-                <p class="card-summary"># 要約
-
-山本雄史著『ロビー活dynamics とは何か』は、政治を動かす実践的なマニュアルとして、ロビー活動の実態と社会経済の発展における役割を解説した新書です。平凡社新書から出版され、224ページ、1,100円（税込）で販売されています。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">SERENDIP（書籍要約）</div>
-                <a class="card-title" href="https://www.serendip.site/20260511" target="_blank">【増刊】コネクションアーキテクチャーの５形態とは何か</a>
-                <p class="card-summary"># 記事の要約
-
-この記事は、『コネクテッドストラテジー』という書籍を紹介しており、顧客とのつながりを再構築するための新たなDX戦略について述べています。著者はニコライ・シゲルコとクリスチャン・テルビーシュで、NTTデータ・コンサルティング・イニシアティブにより日本語に翻訳され、東洋経済新報社から出版されています。本記事はコネクションアーキテクチャーの5つの形態について解説する内容となっています。</p>
-                <div class="card-meta">Mon, 11 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">SERENDIP（書籍要約）</div>
-                <a class="card-title" href="https://www.serendip.site/20260508" target="_blank">【ベストセラー】2026年Ｗ杯が史上初の３カ国共催となった理由</a>
-                <p class="card-summary"># 記事の要約
-
-木崎伸也著『サッカーと地政学』は、サッカーと国際政治の関係を解説した書籍で、2026年ワールドカップが史上初の3国共催となった背景には地政学的な要因があることを明らかにしています。本書は256ページ、1,870円（税込）でワニブックスから出版されています。</p>
-                <div class="card-meta">Fri, 08 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">SERENDIP（書籍要約）</div>
-                <a class="card-title" href="https://www.serendip.site/20260507" target="_blank">【海外書籍】新興国の企業が海外進出を成し遂げるための戦略</a>
-                <p class="card-summary"># 要約
-
-インドネシアの通信大手企業「テリン」のグローバル展開事例を扱う書籍で、新興国企業が国際市場への進出を成功させるための戦略について記述されています。著者はBudi Satria Dharma Purbaで、Gramedia Pustaka Utama から出版された246ページの著作です。</p>
-                <div class="card-meta">Thu, 07 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">SERENDIP（書籍要約）</div>
-                <a class="card-title" href="https://www.serendip.site/20260428" target="_blank">【新書】コンテナ輸送で存在感強める東南アジアの影響</a>
-                <p class="card-summary"># 記事の要約
-
-『コンテナ海運が世界を動かす』という新書は、松田琢磨著によるもので、コンテナ輸送産業と世界経済の関係を解説しています。本書を通じて、グローバル貿易において東南アジアの影響力がコンテナ海運を通じてどのように強まっているかが明らかにされています。</p>
-                <div class="card-meta">Tue, 28 Apr 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">ダイヤモンド・オンライン</div>
-                <a class="card-title" href="https://diamond.jp/articles/-/389813" target="_blank">30年で3億円稼いだサラリーマン投資家が語る「生き残る人」と「退場する人」の決定的な違い - ホットニュース from ZAi</a>
-                <p class="card-summary"># 記事の要約
-
-30年以上のサラリーマン投資家として3億円の資産を築いたJACKさんは、相場で生き残る投資家と退場する投資家の決定的な違いについて語っています。JACKさんは多くの暴落を経験しながらも、その経験をまとめた著書『超インフレ時代でもお金に困らない株投資術』を出版し、個人投資家向けにサバイバル術や相場生き残りの極意を提供しています。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">ダイヤモンド・オンライン</div>
-                <a class="card-title" href="https://diamond.jp/articles/-/389801" target="_blank">あずさ監査法人の40代後半、マネージャー級の年収は？【5000件の口コミ情報データ】 - ダイヤモンド・口コミ情報</a>
-                <p class="card-summary"># 記事の要約
-
-ダイヤモンド・口コミ情報が実施したアンケート調査に基づいて、あずさ監査法人の40代後半マネージャー級の年収データを公開しています。この調査は5000件の口コミ情報データを活用しており、年収・給与制度に関する実態を明らかにしています。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">ダイヤモンド・オンライン</div>
-                <a class="card-title" href="https://diamond.jp/articles/-/389814" target="_blank">電池になってもポルシェはポルシェ。新型マカン・ターボが見せる「周りが止まって見える」加速の衝撃【試乗記】 - CAR and DRIVER 注目カー・ファイル</a>
-                <p class="card-summary"># 要約
-
-ポルシェの新型電動マカン（マカン・エレクトリック）は、2024年7月に発表されたBEVで、スタンダードからマカン・ターボまで複数のグレードを展開しています。出力は360psから639psまで幅広く、価格帯も1038万円から1541万円と多様なニーズに対応する戦略を取っており、パフォーマンスと選択肢の充実で市場をカバーしています。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">ダイヤモンド・オンライン</div>
-                <a class="card-title" href="https://diamond.jp/articles/-/389334" target="_blank">二の腕の太さが気にならない！無印良品の「涼しげトップス」夏までたっぷり着回せてコスパ抜群！【購入レビュー】 - 明日なに着てく？</a>
-                <p class="card-summary">無印良品の「婦人 強撚透かし編みポロセーター」は、ボーダー柄が特徴で1枚で主役になるデザインです。肘まで隠れる長めの袖により二の腕をカバーでき、着心地とシルエットに優れたコスパの良い夏のトップスとして活躍します。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">ダイヤモンド・オンライン</div>
-                <a class="card-title" href="https://diamond.jp/articles/-/386223" target="_blank">【投資歴70年 資産25億円】なぜ「毎日儲けたい」と願うほど株で負ける？ ぐうの音も出ないほど本質的な投資の極意 - 89歳、現役トレーダー 大富豪シゲルさんの教え</a>
-                <p class="card-summary"># 記事の要約
-
-投資歴70年で資産25億円を築いた89歳の現役トレーダー・シゲルさんが、人生のどん底にいるサラリーマンに投資と人生の本質的な教えを授けるという内容です。「毎日儲けたい」と願うほど株で負ける理由など、お金と人生に関する根本的な知識が、小説形式で分かりやすく紹介されています。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">プレジデントオンライン</div>
-                <a class="card-title" href="https://president.jp/articles/-/112958" target="_blank">腸の壁に穴が空き､全身がボロボロに…内科医が｢毎日食べてはダメ｣と警告する"みんな大好きな朝食の定番"【2026年4月BEST】</a>
-                <p class="card-summary"># 記事の要約
-
-この記事は、プレジデントオンラインの2026年4月人気記事の中から、食生活部門第3位として、内科医が毎日食べることを警告する一般的な朝食の定番食材を紹介しています。その食材は腸の壁に穴を開ける可能性があり、全身の健康を害するリスクがあると指摘されています。
-
-※記事の本文が途中で切れているため、具体的な食材名や詳細な説明は要約できませんでした。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">プレジデントオンライン</div>
-                <a class="card-title" href="https://president.jp/articles/-/112949" target="_blank">バターでもジャムでもない…食パンに塗って食べるだけでたんぱく質を手軽に摂取できる"チョイ足し食材"【2026年4月BEST】</a>
-                <p class="card-summary"># 記事の要約
-
-2026年4月のプレジデントオンラインで人気だった食生活部門の第1位は、食パンに塗るだけでたんぱく質を手軽に摂取できる新しい食材に関する記事です。バターやジャムといった従来の塗り物ではない、栄養価の高い「チョイ足し食材」が紹介されています。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">プレジデントオンライン</div>
-                <a class="card-title" href="https://president.jp/articles/-/112627" target="_blank">父親の葬式に来ない母親｡遺品から､娘は母の真実に触れてしまい――『キシモジン』第1話 - 「コミック『キシモジン』」</a>
-                <p class="card-summary"># 記事の要約
-
-漫画『キシモジン』の第1話では、女子高生のしずくが父親の葬式に来ない母親の真実を、遺品から知ることになります。実は、しずくが大好きだと思っていた母親はAIだったという衝撃の設定で、近未来社会における家族のあり方が問い直される作品です。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">プレジデントオンライン</div>
-                <a class="card-title" href="https://president.jp/articles/-/113112" target="_blank">｢1年で9kg減｣50kgの壁を破った40代女性が1日600kcal分食べていたお菓子をやめた画期的な方法</a>
-                <p class="card-summary"># 記事の要約
-
-40代女性が1日600kcal分のお菓子をやめることで、1年間で9kg減量し、50kg台の体重を達成しました。AI食事管理アプリ『あすけん』では、このような減量に成功した人たちの体験談を紹介しており、ダイエット成功の鍵となる具体的な実践方法を提供しています。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">プレジデントオンライン</div>
-                <a class="card-title" href="https://president.jp/articles/-/112953" target="_blank">現役医師｢このままでは国民皆保険が崩壊する｣…高市政権がこっそり進めている｢医療制度改革｣の黒い目的【2026年4月BEST】</a>
-                <p class="card-summary"># 記事の要約
-
-申し訳ございませんが、提供いただいたテキストはタイトルのみで、本文は「▼第1位　…」と途中で切れており、記事の詳細な内容が含まれていません。完全な本文があれば、正確な要約をすることができます。
-
-お手数ですが、記事全体をご提供いただければ、2〜3文での要約をさせていただきます。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">ライフハッカー</div>
-                <a class="card-title" href="https://www.lifehacker.jp/article/2605-gen-z-cant-afford-to-specialize-at-work-genz-specilization-work/" target="_blank">「専門スキルは5年で価値を失う」元ゴールドマン・サックス社員が見出した、陳腐化しない5つの力</a>
-                <p class="card-summary"># 要約
-
-元ゴールドマン・サックスのアナリストは、専門スキルが5年で陳腐化する「専門化の罠」から抜け出し、複数分野に対応できるジェネラリストへの転換を主張しています。これからの時代、市場価値を高めるには狭い専門知識よりも、複数の領域を統合できる5つの普遍的スキルが重要となります。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">ライフハッカー</div>
-                <a class="card-title" href="https://www.lifehacker.jp/article/2605-lht-trackball-perixx/" target="_blank">まるで別物。トラックボールの「ボール交換」でスピード感と滑らかさが格段にアップ！</a>
-                <p class="card-summary"># 記事の要約
-
-ペリックスの交換用トラックボールを使用すると、汚れや傷で鈍くなった元のボールから、より滑らかで高速な操作が可能になります。新しいボールに交換することで、マウス操作のレスポンスが格段に向上し、作業効率が大幅にアップするという内容です。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">ライフハッカー</div>
-                <a class="card-title" href="https://www.lifehacker.jp/article/2605-i-tried-chatgpt-in-carplay-and-it-hallucinated-immediately/" target="_blank">ChatGPTの音声モードがiOS26.4でCarPlayに対応。使ってみた結果と注意点について</a>
-                <p class="card-summary"># 記事の要約
-
-iOS 26.4のアップデートにより、ChatGPTの音声モード機能がAppleのCarPlayに対応し、運転中の利用が可能になりました。音声モードは運転中に便利ですが、運転に集中する必要があるため、提供される情報の正確性をその場でファクトチェックできないというリスクが存在します。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">ライフハッカー</div>
-                <a class="card-title" href="https://www.lifehacker.jp/article/2605-10-hacks-every-apple-notes-user-should-know/" target="_blank">Appleのメモアプリを使い倒す10のテクニック</a>
-                <p class="card-summary"># 記事の要約
-
-Appleの純正「メモ」アプリには、Face IDロックや自動計算機能、スマートフォルダなど、単なるメモ帳の枠を超えた10の隠し機能や裏ワザが搭載されている。これらのテクニックを活用することで、iPhoneやiPad、Macでの仕事の効率を大幅に向上させることができる。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">ライフハッカー</div>
-                <a class="card-title" href="https://www.lifehacker.jp/article/2605-i-switched-from-a-flagship-to-the-pixel-10a/" target="_blank">15万円超のスマホから7万円台の「Pixel 10a」へ乗り換えてもまったく後悔しなかった理由</a>
-                <p class="card-summary"># 記事の要約
-
-高価なフラッグシップ機から7万円台の「Pixel 10a」に乗り換えた専門家が、スペック数値では測れないGoogleのソフトウェア技術とカメラ性能、7年間の長期サポートの価値の高さを実感したレビューです。高騰するスマホ市場において、本当に必要とされる実用的で価値のあるスマートフォンの選択について考察しています。</p>
-                <div class="card-meta">Tue, 12 May 2026</div>
-            </div>
-            <div class="card">
-                <div class="card-source">日経ビジネス</div>
-                <a class="card-title" href="https://business.nikkei.com/atcl/gen/19/00774/051200029/" target="_blank">［独自］成田市議側に約10億円を提供、「みんなで大家さん」運営の共生バンク (「みんなで大家さん」問題)</a>
-                <p class="card-summary"># 要約
-
-不動産ファンド「みんなで大家さん」を運営する共生バンクのグループ会社が、成田市の現職市議（元議長）および親族が経営する法人に対し、10年以上にわたって総額約10億円の資金を提供していたことが判明した。この市議はベテラン議員であり、継続的な支払いを受けていた。</p>
-                <div class="card-meta"></div>
-            </div>
-            <div class="card">
-                <div class="card-source">日経ビジネス</div>
-                <a class="card-title" href="https://business.nikkei.com/atcl/gen/19/00611/051100045/" target="_blank">築58年オフィスでも賃料3割増　政投銀と日建設計、「改修価値」を反映 (会計・財務のサイエンス)</a>
-                <p class="card-summary"># 要約
-
-築古オフィスの改修に注目が集まるなか、政投銀と日建設計が築58年のオフィスの賃料を3割引き上げることで、改修による価値向上を市場に反映させる取り組みを開始した。この試みは、新築を重視してきた日本の不動産市場において、建設費高騰下での改修の価値を認める構造的な転換を示唆している。</p>
-                <div class="card-meta"></div>
-            </div>
-            <div class="card">
-                <div class="card-source">日経ビジネス</div>
-                <a class="card-title" href="https://business.nikkei.com/atcl/seminar/19/00030/051100764/" target="_blank">DeNA南場会長も実践　アレクシオン日本法人社長の「不格好をさらす」経営 (Views)</a>
-                <p class="card-summary"># 要約
-
-アレクシオンファーマの濱村美砂子社長は、自らの弱みや分からないことを積極的にさらけ出し、周囲に助けを求めることで組織を活性化させる経営スタイルを確立している。自分のキャパシティーを超えた領域に目を向けることで、企業にとって最適な選択肢が見えてくるという考え方に基づいており、多様なバックグラウンドを持つチームメンバーの自律性を引き出している。</p>
-                <div class="card-meta"></div>
-            </div>
-            <div class="card">
-                <div class="card-source">日経ビジネス</div>
-                <a class="card-title" href="https://business.nikkei.com/atcl/gen/19/00636/050800089/" target="_blank">50代・年収2000万円で争奪戦　レガシー操る「いぶし銀エンジニア」の正体 (人的資本の現場から)</a>
-                <p class="card-summary"># 記事の要約
-
-IT業界で、古いレガシーシステムを保守・運用できる50代前後のベテランエンジニア（「いぶし銀エンジニア」）の争奪戦が激化しており、年収1000万円から2000万円という高額な条件で即決されているケースが増えている。企業がデジタル化を進める中でも、かつてのシステムの廃止ができず、それを支える経験豊富な人材が極めて重要視されているのが実態である。</p>
-                <div class="card-meta"></div>
-            </div>
-            <div class="card">
-                <div class="card-source">日経ビジネス</div>
-                <a class="card-title" href="https://business.nikkei.com/atcl/gen/19/00873/050100006/" target="_blank">核融合に1000億円予算　民間投資の誘発なるか、「供給網」で基盤固めよ (検証・戦略17分野)</a>
-                <p class="card-summary"># 記事の要約
-
-政府は核融合エネルギー開発に約1000億円を投じて民間投資を促進しており、エネルギー安全保障と産業基盤強化の重要な施策として期待されている。しかし、技術的な不確実性が高く、資金調達でも海外に後れを取っているため、供給網の強化と炉開発における官民の役割分担を明確にすることが日本の競争力強化の鍵となる。</p>
-                <div class="card-meta"></div>
-            </div></div></div>
 <script>
-function switchTab(cat) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(p => p.style.display = 'none');
-  document.querySelector(`[data-cat="${cat}"]`).classList.add('active');
-  document.getElementById(`panel-${cat}`).style.display = 'grid';
+const ARTICLES = [{"id": "ce3938d1553a", "title": "Dessn raises $6M for its production focused design tool", "link": "https://techcrunch.com/2026/05/12/dessn-raises-6m-for-its-production-focused-design-tool/", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 13:00:00 +0000", "source": "TechCrunch AI", "category": "AI"}, {"id": "55313edf898f", "title": "AI voice startup Vapi hits $500M valuation after winning Amazon Ring over 40 rivals", "link": "https://techcrunch.com/2026/05/12/vapi-hits-500m-valuation-as-amazon-ring-chose-its-ai-platform-over-40-rivals/", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 11:30:00 +0000", "source": "TechCrunch AI", "category": "AI"}, {"id": "d3b5b5ad9510", "title": "Thinking Machines wants to build an AI that actually listens while it talks", "link": "https://techcrunch.com/2026/05/11/thinking-machines-wants-to-build-an-ai-that-actually-listens-while-it-talks/", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 04:52:35 +0000", "source": "TechCrunch AI", "category": "AI"}, {"id": "7a7c4cf1151c", "title": "Riding an AI rally, Robinhood preps second retail venture IPO", "link": "https://techcrunch.com/2026/05/11/riding-an-ai-rally-robinhood-preps-second-retail-venture-ipo/", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 00:09:01 +0000", "source": "TechCrunch AI", "category": "AI"}, {"id": "a8dd42f86055", "title": "GM just laid off hundreds of IT workers to hire those with stronger AI skills", "link": "https://techcrunch.com/2026/05/11/gm-just-laid-off-hundreds-of-it-workers-to-hire-those-with-stronger-ai-skills/", "summary": "要約を取得できませんでした。", "published": "Mon, 11 May 2026 23:04:10 +0000", "source": "TechCrunch AI", "category": "AI"}, {"id": "8af7974522b7", "title": "The Download: a Nobel winner on AI, and the case for fixing everything", "link": "https://www.technologyreview.com/2026/05/12/1137103/the-download-nobel-winner-ai-maintenance-of-everything/", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 12:10:00 +0000", "source": "MIT Tech Review", "category": "AI"}, {"id": "18e29f063a54", "title": "Three things in AI to watch, according to a Nobel-winning economist", "link": "https://www.technologyreview.com/2026/05/11/1137090/three-things-in-ai-to-watch-according-to-a-nobel-winning-economist/", "summary": "要約を取得できませんでした。", "published": "Mon, 11 May 2026 17:35:12 +0000", "source": "MIT Tech Review", "category": "AI"}, {"id": "14c481f9151a", "title": "Fostering breakthrough AI innovation through customer-back engineering", "link": "https://www.technologyreview.com/2026/05/11/1136967/fostering-breakthrough-ai-innovation-through-customer-back-engineering/", "summary": "要約を取得できませんでした。", "published": "Mon, 11 May 2026 13:33:06 +0000", "source": "MIT Tech Review", "category": "AI"}, {"id": "bfe32a159113", "title": "Innovation abounds in device charging", "link": "https://www.technologyreview.com/2026/05/11/1136406/innovation-abounds-in-device-charging/", "summary": "要約を取得できませんでした。", "published": "Mon, 11 May 2026 13:00:00 +0000", "source": "MIT Tech Review", "category": "AI"}, {"id": "cff19a85c096", "title": "Implementing advanced AI technologies in finance", "link": "https://www.technologyreview.com/2026/05/11/1136786/implementing-advanced-ai-technologies-in-finance/", "summary": "要約を取得できませんでした。", "published": "Mon, 11 May 2026 13:00:00 +0000", "source": "MIT Tech Review", "category": "AI"}, {"id": "bc6dc8d0a917", "title": "Amazon’s ultrafast 30-minute deliveries are now available in more cities", "link": "https://www.theverge.com/tech/928473/amazons-ultrafast-30-minute-deliveries-are-now-available-in-more-cities", "summary": "要約を取得できませんでした。", "published": "2026-05-12T09:34:12-04:00", "source": "The Verge", "category": "AI"}, {"id": "ed168a0b1caf", "title": "Waymo recalls robotaxis for driving on flooded roads", "link": "https://www.theverge.com/transportation/928480/waymo-recall-flooded-roads-robotaxi", "summary": "要約を取得できませんでした。", "published": "2026-05-12T09:32:39-04:00", "source": "The Verge", "category": "AI"}, {"id": "18086d02423e", "title": "Canvas owner reaches &#8216;agreement&#8217; with hackers to secure stolen data", "link": "https://www.theverge.com/tech/928470/instructure-canvas-hack-shinyhunters-ransom-agreement", "summary": "要約を取得できませんでした。", "published": "2026-05-12T09:23:10-04:00", "source": "The Verge", "category": "AI"}, {"id": "5bd425d0a7bb", "title": "Spotify’s latest ‘Wrapped’ covers your entire music history", "link": "https://www.theverge.com/entertainment/928395/spotify-20th-anniversary-wrapped-recap", "summary": "要約を取得できませんでした。", "published": "2026-05-12T08:15:00-04:00", "source": "The Verge", "category": "AI"}, {"id": "6be6b086036a", "title": "How to watch Google’s Android Show: I/O Edition today", "link": "https://www.theverge.com/tech/928276/google-android-show-io-edition-2026-how-to-watch", "summary": "要約を取得できませんでした。", "published": "2026-05-12T07:00:00-04:00", "source": "The Verge", "category": "AI"}, {"id": "45f994a15450", "title": "How ChatGPT adoption broadened in early 2026", "link": "https://openai.com/signals/research/2026q1-update", "summary": "要約を取得できませんでした。", "published": "Mon, 11 May 2026 15:00:00 GMT", "source": "OpenAI Blog", "category": "AI"}, {"id": "7c483a75c783", "title": "OpenAI Campus Network: Student club interest form", "link": "https://openai.com/index/openai-campus-network-student-club-interest-form", "summary": "要約を取得できませんでした。", "published": "Mon, 11 May 2026 10:00:00 GMT", "source": "OpenAI Blog", "category": "AI"}, {"id": "e3d1e8ca7a4b", "title": "How enterprises are scaling AI", "link": "https://openai.com/business/guides-and-resources/how-enterprises-are-scaling-ai", "summary": "要約を取得できませんでした。", "published": "Mon, 11 May 2026 10:00:00 GMT", "source": "OpenAI Blog", "category": "AI"}, {"id": "c86720c8c7e1", "title": "OpenAI launches DeployCo to help businesses build around intelligence", "link": "https://openai.com/index/openai-launches-the-deployment-company", "summary": "要約を取得できませんでした。", "published": "Mon, 11 May 2026 06:00:00 GMT", "source": "OpenAI Blog", "category": "AI"}, {"id": "09a84312cc4b", "title": "Running Codex safely at OpenAI", "link": "https://openai.com/index/running-codex-safely", "summary": "要約を取得できませんでした。", "published": "Fri, 08 May 2026 12:30:00 GMT", "source": "OpenAI Blog", "category": "AI"}, {"id": "493dd3fda709", "title": "The new AI-powered Google Finance is expanding to Europe.", "link": "https://blog.google/products-and-platforms/products/search/ai-powered-google-finance-in-europe/", "summary": "要約を取得できませんでした。", "published": "Mon, 11 May 2026 06:00:00 +0000", "source": "Google AI Blog", "category": "AI"}, {"id": "70615ef3544f", "title": "See what happens when creative legends use AI to make ads for small businesses.", "link": "https://blog.google/company-news/inside-google/company-announcements/the-small-brief/", "summary": "要約を取得できませんでした。", "published": "Fri, 08 May 2026 15:00:00 +0000", "source": "Google AI Blog", "category": "AI"}, {"id": "5329de4b0dfc", "title": "5 gardening tips you can try right in Search", "link": "https://blog.google/products-and-platforms/products/search/gardening-tips/", "summary": "要約を取得できませんでした。", "published": "Wed, 06 May 2026 16:00:00 +0000", "source": "Google AI Blog", "category": "AI"}, {"id": "5f907f4d68cc", "title": "Google is partnering with XPRIZE and Range Media Partners on the $3.5 million Future Vision film competition.", "link": "https://blog.google/innovation-and-ai/technology/ai/future-vision-film-competition-xprize/", "summary": "要約を取得できませんでした。", "published": "Tue, 05 May 2026 16:00:00 +0000", "source": "Google AI Blog", "category": "AI"}, {"id": "d6be253d5160", "title": "The latest AI news we announced in April 2026", "link": "https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-april-2026/", "summary": "要約を取得できませんでした。", "published": "Mon, 04 May 2026 17:00:00 +0000", "source": "Google AI Blog", "category": "AI"}, {"id": "34d481d9f04f", "title": "高市首相 原油代替調達”来月7割以上確保”今月は備蓄放出せず", "link": "http://www3.nhk.or.jp/news/html/20260512/k10015119701000.html", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 22:36:50 +0900", "source": "NHK ビジネス", "category": "投資・経済"}, {"id": "20a8238aedca", "title": "自民調査会 安保3文書論点整理案“シーレーン防衛強化を”", "link": "http://www3.nhk.or.jp/news/html/20260512/k10015120001000.html", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 22:11:36 +0900", "source": "NHK ビジネス", "category": "投資・経済"}, {"id": "f45dccdcc109", "title": "中道 衆院選総括“大胆な党改革の実行が不可欠”", "link": "http://www3.nhk.or.jp/news/html/20260512/k10015119801000.html", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 22:03:14 +0900", "source": "NHK ビジネス", "category": "投資・経済"}, {"id": "2882993d1cae", "title": "OECDとの経済安保協力プランに基づき連携確認 高市首相", "link": "http://www3.nhk.or.jp/news/html/20260512/k10015119811000.html", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 22:02:05 +0900", "source": "NHK ビジネス", "category": "投資・経済"}, {"id": "79dbcb0ac76f", "title": "高性能AIモデルによるサイバー攻撃リスク対応を指示 高市首相", "link": "http://www3.nhk.or.jp/news/html/20260512/k10015119281000.html", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 20:40:57 +0900", "source": "NHK ビジネス", "category": "投資・経済"}, {"id": "fe8fedbcaa22", "title": "日々是相場［夕刊］――  2026年5月12日（火）", "link": "https://zuuonline.com/archives/301832", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 20:00:00 +0900", "source": "ZUU online", "category": "投資・経済"}, {"id": "de0137df87aa", "title": "米ドル／円 ―― とにかく現在はベッセント･高市会談待ちだ", "link": "https://zuuonline.com/archives/301831", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 19:30:00 +0900", "source": "ZUU online", "category": "投資・経済"}, {"id": "e6c46f260bfe", "title": "米ドル／円 ―― 戻り売りで持ったポジションは下がったところでこまめに確実に利食って行きたい", "link": "https://zuuonline.com/archives/301829", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 19:00:00 +0900", "source": "ZUU online", "category": "投資・経済"}, {"id": "493010d931b2", "title": "【跳ね馬の新たな最高峰】Driving Review：Road／スペイン南部セビリア近郊のワインディングでテストドライブ。フェラーリ849テスタロッサは走るほど身体に馴染んでいった", "link": "https://zuuonline.com/archives/301770", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 17:00:00 +0900", "source": "ZUU online", "category": "投資・経済"}, {"id": "a56f41478925", "title": "上司のためにもなる、ボスマネジメント4つの価値", "link": "https://zuuonline.com/archives/301640", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 16:00:00 +0900", "source": "ZUU online", "category": "投資・経済"}, {"id": "1e2885286ab8", "title": "Spot XRP ETFs attract biggest inflows since January", "link": "https://www.coindesk.com/markets/2026/05/12/spot-xrp-etfs-attract-biggest-inflows-since-january", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 14:08:11 +0000", "source": "CoinDesk", "category": "仮想通貨"}, {"id": "aff8e30b8323", "title": "France’s central banker Beau clashes with Lagarde over private digital euro plans", "link": "https://www.coindesk.com/business/2026/05/12/france-s-central-banker-beau-breaks-with-ecb-s-lagarde-calls-for-private-tokenized-euro-mobilization", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 13:44:30 +0000", "source": "CoinDesk", "category": "仮想通貨"}, {"id": "22c9a109cb31", "title": "EBay rejects GameStop’s $56 billion bid, putting bitcoin exposure back in focus", "link": "https://www.coindesk.com/markets/2026/05/12/ebay-rejects-gamestop-s-usd56-billion-bid-putting-bitcoin-exposure-back-in-focus", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 13:35:09 +0000", "source": "CoinDesk", "category": "仮想通貨"}, {"id": "4dcf2094eff3", "title": "Kraken parent, Franklin Templeton to develop onchain investment products", "link": "https://www.coindesk.com/business/2026/05/12/kraken-parent-franklin-templeton-to-develop-onchain-investment-products", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 13:30:00 +0000", "source": "CoinDesk", "category": "仮想通貨"}, {"id": "71c8f58f1b2b", "title": "Elliptic raises $120 million backed by Nasdaq, Deutsche Bank as AI reshapes crypto security", "link": "https://www.coindesk.com/business/2026/05/12/elliptic-raises-usd120-million-backed-by-nasdaq-deutsche-bank-as-ai-reshapes-crypto-security", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 13:30:00 +0000", "source": "CoinDesk", "category": "仮想通貨"}, {"id": "00de2855a9a5", "title": "Exodus sells over 1,000 Bitcoin as Q1 loss widens to $32M", "link": "https://cointelegraph.com/news/exodus-posts-32m-loss-in-q1-sells-63-of-its-bitcoin-holdings-to-fund-acquisitions?utm_source=rss_feed&utm_medium=rss&utm_campaign=rss_partner_inbound", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 14:05:01 +0000", "source": "CoinTelegraph", "category": "仮想通貨"}, {"id": "b836da556fa3", "title": "North Korea ‘industrialized’ crypto theft, laundered billions: CertiK", "link": "https://cointelegraph.com/news/north-korea-industrialized-crypto-theft-laundered-billions-report-finds?utm_source=rss_feed&utm_medium=rss&utm_campaign=rss_partner_inbound", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 14:00:00 +0000", "source": "CoinTelegraph", "category": "仮想通貨"}, {"id": "a323523cf053", "title": "Bitcoin may avoid historic bear market losses as ETF flows grow, says analyst", "link": "https://cointelegraph.com/markets/bitcoin-may-avoid-historic-bear-market-losses-etf-flows-grow-says-analyst?utm_source=rss_feed&utm_medium=rss&utm_campaign=rss_partner_inbound", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 13:49:44 +0000", "source": "CoinTelegraph", "category": "仮想通貨"}, {"id": "6165ac6abed8", "title": "Roaring Kitty-linked RKC memecoin crashes as developer cashes out $729K", "link": "https://cointelegraph.com/news/memecoin-dev-cashes-out-729k-gamestop-orchestrators-x-post?utm_source=rss_feed&utm_medium=rss&utm_campaign=rss_partner_inbound", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 13:44:12 +0000", "source": "CoinTelegraph", "category": "仮想通貨"}, {"id": "9a9606f73617", "title": "Four signs that Bitcoin has recovered to ‘full’ bullish momentum", "link": "https://cointelegraph.com/markets/four-signs-bitcoin-recovered-full-bullish-momentum?utm_source=rss_feed&utm_medium=rss&utm_campaign=rss_partner_inbound", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 13:32:06 +0000", "source": "CoinTelegraph", "category": "仮想通貨"}, {"id": "41e320ef91cf", "title": "サークル、独自L1「Arc」のトークンで約3.2億ドル調達。a16zやブラックロックら参加", "link": "https://www.neweconomy.jp/posts/572947", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 09:24:39 +0000", "source": "あたらしい経済", "category": "仮想通貨"}, {"id": "97f53b175197", "title": "リップルプライム、最大2億ドルの融資枠確保。ニューバーガー運用ファンドから", "link": "https://www.neweconomy.jp/posts/572885", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 07:30:06 +0000", "source": "あたらしい経済", "category": "仮想通貨"}, {"id": "35307d73b201", "title": "【追記】コインチェックGがKDDIと資本提携で100億円調達へ、新会社組成も", "link": "https://www.neweconomy.jp/posts/572887", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 07:22:55 +0000", "source": "あたらしい経済", "category": "仮想通貨"}, {"id": "eb01d0ea2b29", "title": "バイナンス、AI活用で約1.6兆円の詐欺被害を防止", "link": "https://www.neweconomy.jp/posts/572867", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 07:16:15 +0000", "source": "あたらしい経済", "category": "仮想通貨"}, {"id": "7991889bc1a1", "title": "スイ、ステーブルコイン送金無料化へ。プライベートトランザクションも導入予定", "link": "https://www.neweconomy.jp/posts/572849", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 07:05:20 +0000", "source": "あたらしい経済", "category": "仮想通貨"}, {"id": "294ad693b3d8", "title": "【大川智宏vsアナウンサー】円安はどこまで進む？為替相場の行方をガチ討論！「巨額のデジタル赤字が…」AIも駆使して議論白熱！／1年後に1ドル=200円に「到達する」VS「到達しない」 | ビジネス | 東洋経済オンライン", "link": "https://toyokeizai.net/articles/-/944305?utm_source=rss&utm_medium=http&utm_campaign=link_back", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 19:00:00 +0900", "source": "東洋経済オンライン", "category": "お金・資産形成"}, {"id": "56e611be91a2", "title": "LINEヤフー･ベイン連合がカカクコム買収で対抗提案､スウェーデンの投資会社EQTと争う形に | 政治・経済・投資 | 東洋経済オンライン", "link": "https://toyokeizai.net/articles/-/944258?utm_source=rss&utm_medium=http&utm_campaign=link_back", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 16:33:00 +0900", "source": "東洋経済オンライン", "category": "お金・資産形成"}, {"id": "045b23b5f119", "title": "ベッセント氏｢アメリカと日本の強固な経済パートナーシップをあらためて確認できたことを喜ばしく思う｣と表明 | 政治・経済・投資 | 東洋経済オンライン", "link": "https://toyokeizai.net/articles/-/944243?utm_source=rss&utm_medium=http&utm_campaign=link_back", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 16:30:00 +0900", "source": "東洋経済オンライン", "category": "お金・資産形成"}, {"id": "fa5a92993ac3", "title": "日本の｢もがみ｣型護衛艦か？イギリスの31型フリゲートか？…ニュージーランドへの艦艇供給をめぐって受注競争 | 政治・経済・投資 | 東洋経済オンライン", "link": "https://toyokeizai.net/articles/-/944217?utm_source=rss&utm_medium=http&utm_campaign=link_back", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 16:23:00 +0900", "source": "東洋経済オンライン", "category": "お金・資産形成"}, {"id": "4918870bcb71", "title": "サバンナ高橋のいじめ謝罪で露呈した｢匿名トーク｣の限界　ネット特定班に先回りした相方･八木の\"救いの手\" | ライフ | 東洋経済オンライン", "link": "https://toyokeizai.net/articles/-/944213?utm_source=rss&utm_medium=http&utm_campaign=link_back", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 13:30:00 +0900", "source": "東洋経済オンライン", "category": "お金・資産形成"}, {"id": "728bf0ba5ff5", "title": "【新書】社会経済の発展と進化に資するロビー活動の実態", "link": "https://www.serendip.site/20260512", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 02:30:00 +0000", "source": "SERENDIP（書籍要約）", "category": "書籍・ビジネス"}, {"id": "74a2e37bbb1b", "title": "【増刊】コネクションアーキテクチャーの５形態とは何か", "link": "https://www.serendip.site/20260511", "summary": "要約を取得できませんでした。", "published": "Mon, 11 May 2026 02:30:00 +0000", "source": "SERENDIP（書籍要約）", "category": "書籍・ビジネス"}, {"id": "1a02eaf58e24", "title": "【ベストセラー】2026年Ｗ杯が史上初の３カ国共催となった理由", "link": "https://www.serendip.site/20260508", "summary": "要約を取得できませんでした。", "published": "Fri, 08 May 2026 02:30:00 +0000", "source": "SERENDIP（書籍要約）", "category": "書籍・ビジネス"}, {"id": "3feb51f025ba", "title": "【海外書籍】新興国の企業が海外進出を成し遂げるための戦略", "link": "https://www.serendip.site/20260507", "summary": "要約を取得できませんでした。", "published": "Thu, 07 May 2026 02:30:00 +0000", "source": "SERENDIP（書籍要約）", "category": "書籍・ビジネス"}, {"id": "935e3a506cab", "title": "【新書】コンテナ輸送で存在感強める東南アジアの影響", "link": "https://www.serendip.site/20260428", "summary": "要約を取得できませんでした。", "published": "Tue, 28 Apr 2026 02:30:00 +0000", "source": "SERENDIP（書籍要約）", "category": "書籍・ビジネス"}, {"id": "4f80742b0b7a", "title": "30年で3億円稼いだサラリーマン投資家が語る「生き残る人」と「退場する人」の決定的な違い - ホットニュース from ZAi", "link": "https://diamond.jp/articles/-/389813", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 21:00:00 +0900", "source": "ダイヤモンド・オンライン", "category": "書籍・ビジネス"}, {"id": "c9d675c07352", "title": "あずさ監査法人の40代後半、マネージャー級の年収は？【5000件の口コミ情報データ】 - ダイヤモンド・口コミ情報", "link": "https://diamond.jp/articles/-/389801", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 18:00:00 +0900", "source": "ダイヤモンド・オンライン", "category": "書籍・ビジネス"}, {"id": "d4909e36e35a", "title": "電池になってもポルシェはポルシェ。新型マカン・ターボが見せる「周りが止まって見える」加速の衝撃【試乗記】 - CAR and DRIVER 注目カー・ファイル", "link": "https://diamond.jp/articles/-/389814", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 17:00:00 +0900", "source": "ダイヤモンド・オンライン", "category": "書籍・ビジネス"}, {"id": "c439c30922b0", "title": "二の腕の太さが気にならない！無印良品の「涼しげトップス」夏までたっぷり着回せてコスパ抜群！【購入レビュー】 - 明日なに着てく？", "link": "https://diamond.jp/articles/-/389334", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 16:11:00 +0900", "source": "ダイヤモンド・オンライン", "category": "書籍・ビジネス"}, {"id": "6f44f28c87a7", "title": "【投資歴70年 資産25億円】なぜ「毎日儲けたい」と願うほど株で負ける？ ぐうの音も出ないほど本質的な投資の極意 - 89歳、現役トレーダー 大富豪シゲルさんの教え", "link": "https://diamond.jp/articles/-/386223", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 16:00:00 +0900", "source": "ダイヤモンド・オンライン", "category": "書籍・ビジネス"}, {"id": "595f5cc23d43", "title": "腸の壁に穴が空き､全身がボロボロに…内科医が｢毎日食べてはダメ｣と警告する\"みんな大好きな朝食の定番\"【2026年4月BEST】", "link": "https://president.jp/articles/-/112958", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 18:00:00 +0900", "source": "プレジデントオンライン", "category": "書籍・ビジネス"}, {"id": "dad3ff80f447", "title": "バターでもジャムでもない…食パンに塗って食べるだけでたんぱく質を手軽に摂取できる\"チョイ足し食材\"【2026年4月BEST】", "link": "https://president.jp/articles/-/112949", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 18:00:00 +0900", "source": "プレジデントオンライン", "category": "書籍・ビジネス"}, {"id": "42f2eab1418a", "title": "父親の葬式に来ない母親｡遺品から､娘は母の真実に触れてしまい――『キシモジン』第1話 - 「コミック『キシモジン』」", "link": "https://president.jp/articles/-/112627", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 18:00:00 +0900", "source": "プレジデントオンライン", "category": "書籍・ビジネス"}, {"id": "d43ab0c71de9", "title": "｢1年で9kg減｣50kgの壁を破った40代女性が1日600kcal分食べていたお菓子をやめた画期的な方法", "link": "https://president.jp/articles/-/113112", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 17:30:00 +0900", "source": "プレジデントオンライン", "category": "書籍・ビジネス"}, {"id": "d9009f8b516b", "title": "現役医師｢このままでは国民皆保険が崩壊する｣…高市政権がこっそり進めている｢医療制度改革｣の黒い目的【2026年4月BEST】", "link": "https://president.jp/articles/-/112953", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 17:00:00 +0900", "source": "プレジデントオンライン", "category": "書籍・ビジネス"}, {"id": "be21e5bf0ce0", "title": "「専門スキルは5年で価値を失う」元ゴールドマン・サックス社員が見出した、陳腐化しない5つの力", "link": "https://www.lifehacker.jp/article/2605-gen-z-cant-afford-to-specialize-at-work-genz-specilization-work/", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 14:00:00 GMT", "source": "ライフハッカー", "category": "書籍・ビジネス"}, {"id": "7b76f3de35c0", "title": "まるで別物。トラックボールの「ボール交換」でスピード感と滑らかさが格段にアップ！", "link": "https://www.lifehacker.jp/article/2605-lht-trackball-perixx/", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 13:15:00 GMT", "source": "ライフハッカー", "category": "書籍・ビジネス"}, {"id": "c2e68fc1752d", "title": "ChatGPTの音声モードがiOS26.4でCarPlayに対応。使ってみた結果と注意点について", "link": "https://www.lifehacker.jp/article/2605-i-tried-chatgpt-in-carplay-and-it-hallucinated-immediately/", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 12:45:00 GMT", "source": "ライフハッカー", "category": "書籍・ビジネス"}, {"id": "ac3e2f47dcd2", "title": "Appleのメモアプリを使い倒す10のテクニック", "link": "https://www.lifehacker.jp/article/2605-10-hacks-every-apple-notes-user-should-know/", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 12:30:00 GMT", "source": "ライフハッカー", "category": "書籍・ビジネス"}, {"id": "e6c4a090735d", "title": "15万円超のスマホから7万円台の「Pixel 10a」へ乗り換えてもまったく後悔しなかった理由", "link": "https://www.lifehacker.jp/article/2605-i-switched-from-a-flagship-to-the-pixel-10a/", "summary": "要約を取得できませんでした。", "published": "Tue, 12 May 2026 12:00:00 GMT", "source": "ライフハッカー", "category": "書籍・ビジネス"}, {"id": "940b0895ba8e", "title": "［独自］成田市議側に約10億円を提供、「みんなで大家さん」運営の共生バンク (「みんなで大家さん」問題)", "link": "https://business.nikkei.com/atcl/gen/19/00774/051200029/", "summary": "要約を取得できませんでした。", "published": "", "source": "日経ビジネス", "category": "書籍・ビジネス"}, {"id": "6dbe13be687e", "title": "築58年オフィスでも賃料3割増　政投銀と日建設計、「改修価値」を反映 (会計・財務のサイエンス)", "link": "https://business.nikkei.com/atcl/gen/19/00611/051100045/", "summary": "要約を取得できませんでした。", "published": "", "source": "日経ビジネス", "category": "書籍・ビジネス"}, {"id": "816614bfff32", "title": "DeNA南場会長も実践　アレクシオン日本法人社長の「不格好をさらす」経営 (Views)", "link": "https://business.nikkei.com/atcl/seminar/19/00030/051100764/", "summary": "要約を取得できませんでした。", "published": "", "source": "日経ビジネス", "category": "書籍・ビジネス"}, {"id": "6cd0bc67d79d", "title": "50代・年収2000万円で争奪戦　レガシー操る「いぶし銀エンジニア」の正体 (人的資本の現場から)", "link": "https://business.nikkei.com/atcl/gen/19/00636/050800089/", "summary": "要約を取得できませんでした。", "published": "", "source": "日経ビジネス", "category": "書籍・ビジネス"}, {"id": "a560753f0a86", "title": "核融合に1000億円予算　民間投資の誘発なるか、「供給網」で基盤固めよ (検証・戦略17分野)", "link": "https://business.nikkei.com/atcl/gen/19/00873/050100006/", "summary": "要約を取得できませんでした。", "published": "", "source": "日経ビジネス", "category": "書籍・ビジネス"}];
+const CATEGORIES = ["AI", "投資・経済", "仮想通貨", "お金・資産形成", "書籍・ビジネス"];
+const COLORS = {"AI": "#6366f1", "投資・経済": "#10b981", "仮想通貨": "#f59e0b", "お金・資産形成": "#ec4899", "書籍・ビジネス": "#8b5cf6", "保存済み": "#f43f5e"};
+const STORAGE_KEY = "newsDashboard.saved.v1";
+const SAVED_LABEL = "保存済み";
+
+let savedMap = {};
+try { savedMap = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); } catch (e) { savedMap = {}; }
+
+let activeCat = CATEGORIES[0];
+let currentArticleId = null;
+
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
 }
+
+function persist() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(savedMap));
+}
+
+function articlesFor(cat) {
+  if (cat === SAVED_LABEL) {
+    return Object.values(savedMap).sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0));
+  }
+  return ARTICLES.filter(a => a.category === cat);
+}
+
+function isSaved(id) { return Object.prototype.hasOwnProperty.call(savedMap, id); }
+
+function renderTabs() {
+  const all = [...CATEGORIES, SAVED_LABEL];
+  const tabs = document.getElementById("tabs");
+  tabs.innerHTML = all.map(cat => {
+    const color = COLORS[cat] || "#888899";
+    const count = articlesFor(cat).length;
+    const active = cat === activeCat ? "active" : "";
+    return `<button class="tab ${active}" data-cat="${esc(cat)}" style="--accent:${color}">${esc(cat)}<span class="count">${count}</span></button>`;
+  }).join("");
+  tabs.querySelectorAll(".tab").forEach(btn => {
+    btn.addEventListener("click", () => { activeCat = btn.dataset.cat; render(); });
+  });
+}
+
+function cardHtml(a) {
+  const saved = isSaved(a.id) ? "saved" : "";
+  const star = isSaved(a.id) ? "★" : "☆";
+  const pub = a.published ? esc(a.published.slice(0, 16)) : "";
+  return `
+    <div class="card" data-id="${esc(a.id)}">
+      <button class="save-btn ${saved}" data-id="${esc(a.id)}" title="${isSaved(a.id) ? "保存解除" : "保存"}">${star}</button>
+      <div class="card-source">${esc(a.source)}</div>
+      <div class="card-title">${esc(a.title)}</div>
+      <p class="card-summary">${esc(a.summary)}</p>
+      <div class="card-meta">${pub}</div>
+    </div>`;
+}
+
+function renderPanel() {
+  const items = articlesFor(activeCat);
+  const main = document.getElementById("main");
+  if (items.length === 0) {
+    const msg = activeCat === SAVED_LABEL
+      ? "保存した記事はまだありません。<br>各カードの☆ボタンで保存できます。"
+      : "記事がありません。";
+    main.innerHTML = `<div class="panel"><div class="empty-state">${msg}</div></div>`;
+    return;
+  }
+  main.innerHTML = `<div class="panel">${items.map(cardHtml).join("")}</div>`;
+  main.querySelectorAll(".card").forEach(c => {
+    c.addEventListener("click", e => {
+      if (e.target.closest(".save-btn")) return;
+      openModal(c.dataset.id);
+    });
+  });
+  main.querySelectorAll(".save-btn").forEach(b => {
+    b.addEventListener("click", e => {
+      e.stopPropagation();
+      toggleSave(b.dataset.id);
+    });
+  });
+}
+
+function render() {
+  renderTabs();
+  renderPanel();
+}
+
+function findArticle(id) {
+  return savedMap[id] || ARTICLES.find(a => a.id === id);
+}
+
+function openModal(id) {
+  const a = findArticle(id);
+  if (!a) return;
+  currentArticleId = id;
+  document.getElementById("modal-source").textContent = `${a.source} · ${a.category}`;
+  document.getElementById("modal-title").textContent = a.title;
+  document.getElementById("modal-meta").textContent = a.published || "";
+  document.getElementById("modal-summary").textContent = a.summary;
+  document.getElementById("modal-link").href = a.link;
+  updateModalSaveBtn();
+  document.getElementById("modal").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeModal() {
+  document.getElementById("modal").classList.remove("open");
+  document.body.style.overflow = "";
+  currentArticleId = null;
+}
+
+function toggleSave(id) {
+  if (isSaved(id)) {
+    delete savedMap[id];
+  } else {
+    const a = ARTICLES.find(x => x.id === id) || savedMap[id];
+    if (!a) return;
+    savedMap[id] = { ...a, savedAt: Date.now() };
+  }
+  persist();
+  render();
+  if (currentArticleId === id) updateModalSaveBtn();
+}
+
+function updateModalSaveBtn() {
+  const btn = document.getElementById("modal-save");
+  const saved = isSaved(currentArticleId);
+  btn.textContent = saved ? "★ 保存済み" : "☆ 保存";
+  btn.classList.toggle("saved", saved);
+}
+
+document.getElementById("modal-close").addEventListener("click", closeModal);
+document.getElementById("modal").addEventListener("click", e => {
+  if (e.target.id === "modal") closeModal();
+});
+document.getElementById("modal-save").addEventListener("click", () => {
+  if (currentArticleId) toggleSave(currentArticleId);
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") {
+    closeModal();
+    document.getElementById("update-overlay").classList.remove("open");
+  }
+});
+
+// update modal
+document.getElementById("update-btn").addEventListener("click", () => {
+  document.getElementById("update-overlay").classList.add("open");
+});
+document.getElementById("update-modal-close").addEventListener("click", () => {
+  document.getElementById("update-overlay").classList.remove("open");
+});
+document.getElementById("update-overlay").addEventListener("click", e => {
+  if (e.target.id === "update-overlay") document.getElementById("update-overlay").classList.remove("open");
+});
+document.getElementById("copy-cmd-btn").addEventListener("click", () => {
+  navigator.clipboard.writeText("python3 ~/news-dashboard/fetch_news.py").then(() => {
+    const btn = document.getElementById("copy-cmd-btn");
+    btn.textContent = "コピー済み!";
+    btn.classList.add("copied");
+    setTimeout(() => { btn.textContent = "コピー"; btn.classList.remove("copied"); }, 2000);
+  });
+});
+
+render();
 </script>
 </body>
 </html>
