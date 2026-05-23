@@ -200,6 +200,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <div class="update-modal" role="dialog" aria-modal="true">
     <button class="modal-close" id="update-modal-close">×</button>
     <h3>ニュースを最新情報に更新する</h3>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">自動更新サーバー（port 8765）が起動していません。手動で更新するには：</p>
     <ol class="update-steps">
       <li>
         <span class="step-num">1</span>
@@ -369,10 +370,7 @@ document.addEventListener("keydown", e => {
   }
 });
 
-// update modal
-document.getElementById("update-btn").addEventListener("click", () => {
-  document.getElementById("update-overlay").classList.add("open");
-});
+// update modal (fallback when server is not running)
 document.getElementById("update-modal-close").addEventListener("click", () => {
   document.getElementById("update-overlay").classList.remove("open");
 });
@@ -386,6 +384,30 @@ document.getElementById("copy-cmd-btn").addEventListener("click", () => {
     btn.classList.add("copied");
     setTimeout(() => { btn.textContent = "コピー"; btn.classList.remove("copied"); }, 2000);
   });
+});
+
+// update button: hit local server, fall back to manual modal
+document.getElementById("update-btn").addEventListener("click", async () => {
+  const btn = document.getElementById("update-btn");
+  btn.textContent = "⏳ 更新中...";
+  btn.disabled = true;
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 150000);
+    const res = await fetch("http://localhost:8765/update", { signal: ctrl.signal });
+    clearTimeout(timer);
+    const data = await res.json();
+    if (data.status === "ok") {
+      btn.textContent = "✅ 完了！再読込します";
+      setTimeout(() => location.reload(), 2500);
+    } else {
+      throw new Error(data.message || "エラー");
+    }
+  } catch (e) {
+    btn.textContent = "🔄 ニュース更新";
+    btn.disabled = false;
+    document.getElementById("update-overlay").classList.add("open");
+  }
 });
 
 render();
